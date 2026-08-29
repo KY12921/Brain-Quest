@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Study Boss — Level up your studying</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Top bar: shown once logged in -->
+<header id="top-bar" class="top-bar hidden">
+  <div class="top-bar-inner">
+    <span class="brand">Study<span class="brand-accent">Boss</span></span>
+    <div class="xp-hud">
+      <span class="xp-label">XP</span>
+      <div class="xp-bar">
+        <div class="xp-bar-fill" id="xp-bar-fill"></div>
+        <div class="xp-bar-ticks"></div>
+      </div>
+      <span class="xp-count" id="xp-count">0</span>
+    </div>
+    <button id="sign-out-btn" class="btn btn-ghost">Sign out</button>
+  </div>
+</header>
+
+<main id="app">
+
+  <!-- AUTH SCREEN -->
+  <section id="auth-section" class="screen">
+    <div class="auth-card">
+      <h1 class="logo">Study<span class="brand-accent">Boss</span></h1>
+      <p class="tagline">Turn studying into a game you actually want to play.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign in</button>
+        <button class="auth-tab" data-tab="signup">Create account</button>
+      </div>
+
+      <form id="signin-form" class="auth-form">
+        <label>Email
+          <input type="email" id="signin-email" required autocomplete="email">
+        </label>
+        <label>Password
+          <input type="password" id="signin-password" required autocomplete="current-password">
+        </label>
+        <button type="submit" class="btn btn-primary">Sign in</button>
+        <p class="form-error" id="signin-error"></p>
+      </form>
+
+      <form id="signup-form" class="auth-form hidden">
+        <label>Display name
+          <input type="text" id="signup-name" required autocomplete="nickname">
+        </label>
+        <label>Email
+          <input type="email" id="signup-email" required autocomplete="email">
+        </label>
+        <label>Password
+          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button type="submit" class="btn btn-primary">Create account</button>
+        <p class="form-error" id="signup-error"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- SUBJECT SELECT SCREEN -->
+  <section id="subjects-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Choose your quest</h2>
+      <p class="section-subtitle">Pick a subject. Answer 5 questions. Earn XP.</p>
+      <div class="quest-grid" id="quest-grid">
+        <!-- quest cards injected by app.js -->
+      </div>
+    </div>
+  </section>
+
+  <!-- QUIZ SCREEN -->
+  <section id="quiz-section" class="screen hidden">
+    <div class="section-inner quiz-inner">
+      <div class="quiz-progress">
+        <span id="quiz-progress-label">Question 1 of 5</span>
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="quiz-card">
+        <p class="quiz-subject-tag" id="quiz-subject-tag"></p>
+        <h3 class="quiz-question" id="quiz-question"></h3>
+        <div class="quiz-options" id="quiz-options"></div>
+        <p class="quiz-feedback" id="quiz-feedback"></p>
+        <button class="btn btn-primary hidden" id="quiz-next-btn">Next question</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section id="results-section" class="screen hidden">
+    <div class="section-inner results-inner">
+      <p class="results-eyebrow">Quest complete</p>
+      <h2 class="results-score" id="results-score">0 / 5</h2>
+      <p class="results-xp-gain" id="results-xp-gain">+0 XP</p>
+      <p class="results-message" id="results-message"></p>
+      <div class="results-actions">
+        <button class="btn btn-primary" id="results-again-btn">Try another subject</button>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<!-- Firebase SDKs (v9 compat build — simplest for a single-file no-build setup) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
