@@ -11,6 +11,8 @@
 </head>
 <body>
 
+<button id="theme-toggle-btn" class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle light/dark mode">🌙</button>
+
 <!-- Top bar: shown once logged in -->
 <header id="top-bar" class="top-bar hidden">
   <div class="top-bar-inner">
@@ -25,6 +27,15 @@
     </div>
     <button id="sign-out-btn" class="btn btn-ghost">Sign out</button>
   </div>
+  <nav class="main-nav" id="main-nav">
+    <button class="nav-btn active" data-nav="subjects-section">Quests</button>
+    <button class="nav-btn" data-nav="boss-section">Boss Fight</button>
+    <button class="nav-btn" data-nav="missions-section">Missions</button>
+    <button class="nav-btn" data-nav="leaderboard-section">Leaderboard</button>
+    <button class="nav-btn" data-nav="duel-section">Duel</button>
+    <button class="nav-btn" data-nav="tutor-section">AI Tutor</button>
+    <button class="nav-btn nav-pro" data-nav="pro-section">Go Pro</button>
+  </nav>
 </header>
 
 <main id="app">
@@ -70,15 +81,27 @@
   <!-- SUBJECT SELECT SCREEN -->
   <section id="subjects-section" class="screen hidden">
     <div class="section-inner">
+      <p class="welcome-message" id="welcome-message"></p>
       <h2 class="section-title">Choose your quest</h2>
       <p class="section-subtitle">Pick a subject. Answer 5 questions. Earn XP.</p>
-      <div class="quest-grid" id="quest-grid">
-        <!-- quest cards injected by app.js -->
+      <div class="quest-grid" id="quest-grid"></div>
+      <div class="ad-banner" id="ad-banner-subjects">
+        <span>📢 Advertisement — <a href="#" data-nav="pro-section" class="ad-link">Go Pro to remove ads</a></span>
       </div>
     </div>
   </section>
 
-  <!-- QUIZ SCREEN -->
+  <!-- CHAPTER SELECT SCREEN -->
+  <section id="chapters-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="chapters-back-btn">← Back to subjects</button>
+      <h2 class="section-title" id="chapters-heading">Chapters</h2>
+      <p class="section-subtitle">Each chapter gets harder. Complete one to unlock the next.</p>
+      <div class="quest-grid" id="chapters-grid"></div>
+    </div>
+  </section>
+
+  <!-- QUIZ SCREEN (shared by quests, boss fights, and duels) -->
   <section id="quiz-section" class="screen hidden">
     <div class="section-inner quiz-inner">
       <div class="quiz-progress">
@@ -88,11 +111,16 @@
         </div>
       </div>
 
+      <div class="hearts-hud hidden" id="hearts-hud"></div>
+
       <div class="quiz-card">
         <p class="quiz-subject-tag" id="quiz-subject-tag"></p>
         <h3 class="quiz-question" id="quiz-question"></h3>
         <div class="quiz-options" id="quiz-options"></div>
+        <button class="btn btn-primary hidden" id="quiz-confirm-btn">Confirm answer</button>
         <p class="quiz-feedback" id="quiz-feedback"></p>
+        <button class="btn btn-ghost hidden" id="quiz-explain-btn">Explain this</button>
+        <p class="quiz-explanation hidden" id="quiz-explanation"></p>
         <button class="btn btn-primary hidden" id="quiz-next-btn">Next question</button>
       </div>
     </div>
@@ -101,18 +129,103 @@
   <!-- RESULTS SCREEN -->
   <section id="results-section" class="screen hidden">
     <div class="section-inner results-inner">
-      <p class="results-eyebrow">Quest complete</p>
+      <p class="results-eyebrow" id="results-eyebrow">Quest complete</p>
       <h2 class="results-score" id="results-score">0 / 5</h2>
       <p class="results-xp-gain" id="results-xp-gain">+0 XP</p>
+      <p class="results-upsell hidden" id="results-upsell">Purchase Pro version to continue</p>
       <p class="results-message" id="results-message"></p>
       <div class="results-actions">
-        <button class="btn btn-primary" id="results-again-btn">Try another subject</button>
+        <button class="btn btn-primary" id="results-again-btn">Back to Quests</button>
       </div>
+    </div>
+  </section>
+
+  <!-- BOSS FIGHT SCREEN -->
+  <section id="boss-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Boss Fight</h2>
+      <p class="section-subtitle">Exam-level questions. 5 hearts. Miss 5 and you're defeated. Each win makes the boss tougher.</p>
+      <div class="quest-grid" id="boss-grid"></div>
+    </div>
+  </section>
+
+  <!-- MISSIONS SCREEN -->
+  <section id="missions-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Daily Missions</h2>
+      <p class="section-subtitle">Complete missions for bonus XP. Resets every day.</p>
+      <div class="mission-card" id="mission-card"></div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD SCREEN -->
+  <section id="leaderboard-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Leaderboard</h2>
+      <p class="section-subtitle">Top students by total XP.</p>
+      <div class="leaderboard-list" id="leaderboard-list">
+        <p class="leaderboard-loading">Loading leaderboard…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- DUEL SCREEN -->
+  <section id="duel-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Duel</h2>
+      <p class="section-subtitle">Challenge a friend — same 5 questions, highest score wins.</p>
+
+      <div id="duel-menu" class="duel-panel">
+        <div class="duel-create">
+          <h3 class="duel-subheading">Start a duel</h3>
+          <select id="duel-subject-select" class="duel-select"></select>
+          <button class="btn btn-primary" id="duel-create-btn">Create duel</button>
+        </div>
+        <div class="duel-join">
+          <h3 class="duel-subheading">Join a duel</h3>
+          <input type="text" id="duel-code-input" placeholder="Enter duel code" class="duel-input">
+          <button class="btn btn-primary" id="duel-join-btn">Join duel</button>
+        </div>
+        <p class="form-error" id="duel-error"></p>
+      </div>
+
+      <div id="duel-waiting" class="duel-panel hidden">
+        <p class="duel-subheading">Share this code with your friend:</p>
+        <p class="duel-code" id="duel-code-display"></p>
+        <p class="duel-status" id="duel-waiting-status">Waiting for opponent to finish…</p>
+      </div>
+
+      <div id="duel-result" class="duel-panel hidden">
+        <h3 class="duel-subheading">Duel result</h3>
+        <div class="duel-result-row" id="duel-result-creator"></div>
+        <div class="duel-result-row" id="duel-result-opponent"></div>
+        <p class="duel-winner" id="duel-winner-text"></p>
+        <button class="btn btn-primary" id="duel-back-btn">Back to Duel menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI TUTOR SCREEN -->
+  <section id="tutor-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">AI Tutor</h2>
+      <p class="section-subtitle">Tracks your weak areas and serves you a tailored question to work on.</p>
+      <div class="tutor-card" id="tutor-card"></div>
+    </div>
+  </section>
+
+  <!-- GO PRO SCREEN -->
+  <section id="pro-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Study Boss Pro</h2>
+      <p class="section-subtitle">$5.99/month — unlimited replays, unlimited AI Tutor questions, and no ads.</p>
+      <div class="pro-card" id="pro-card"></div>
     </div>
   </section>
 
 </main>
 
+<script src="js/theme.js"></script>
 <!-- Firebase SDKs (v9 compat build — simplest for a single-file no-build setup) -->
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
@@ -121,5 +234,11 @@
 <script src="js/firebase-config.js"></script>
 <script src="js/questions.js"></script>
 <script src="js/app.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/missions.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/duels.js"></script>
+<script src="js/tutor.js"></script>
+<script src="js/pro.js"></script>
 </body>
 </html>
