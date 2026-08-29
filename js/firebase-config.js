@@ -1,23 +1,15 @@
 // ------------------------------------------------------------------
-// PASTE YOUR OWN FIREBASE CONFIG HERE.
-//
-// How to get this (takes ~3 minutes):
-// 1. Go to https://console.firebase.google.com and create a project.
-// 2. In the project, click the "</>" (web) icon to register a web app.
-// 3. Firebase will show you a config object — copy it into firebaseConfig below.
-// 4. In the Firebase console sidebar: Build > Authentication > Sign-in method
-//    > enable "Email/Password".
-// 5. In the Firebase console sidebar: Build > Firestore Database > Create database
-//    (start in "test mode" for now — see README for production security rules).
+// Firebase config for the Study Boss project (study-boss-3e3e4).
+// Already filled in — no editing needed for this file.
 // ------------------------------------------------------------------
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT.firebaseapp.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyCDHIEqZcpvSeuYfcdxhly8Xw-G5T3koc8",
+  authDomain: "study-boss-3e3e4.firebaseapp.com",
+  projectId: "study-boss-3e3e4",
+  storageBucket: "study-boss-3e3e4.firebasestorage.app",
+  messagingSenderId: "164740651144",
+  appId: "1:164740651144:web:8f1d76923f7c275114e73d"
 };
 
 firebase.initializeApp(firebaseConfig);
