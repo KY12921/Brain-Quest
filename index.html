@@ -1,0 +1,950 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>version5 — Level up your studying</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Work+Sans:wght@400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<!-- Level-up overlay -->
+<div id="level-up-overlay" class="level-up-overlay hidden">
+  <div class="level-up-card">
+    <p class="level-up-eyebrow">Level Up!</p>
+    <p class="level-up-number" id="level-up-number">2</p>
+    <p class="level-up-sub">Keep it going.</p>
+    <button class="btn btn-primary" id="level-up-close-btn">Nice!</button>
+  </div>
+</div>
+
+<!-- League promotion/demotion overlay -->
+<div id="league-change-overlay" class="level-up-overlay hidden">
+  <div class="level-up-card">
+    <p class="level-up-eyebrow" id="league-change-title">Promoted!</p>
+    <p class="level-up-number league-change-name" id="league-change-name">Silver League</p>
+    <p class="level-up-sub" id="league-change-sub">You climbed into a tougher league last week.</p>
+    <button class="btn btn-primary" id="league-change-close-btn">Nice!</button>
+  </div>
+</div>
+
+<!-- Tutorial prompt overlay (shown once, first time an account has no hasSeenTutorial flag) -->
+<div id="tutorial-prompt-overlay" class="level-up-overlay hidden">
+  <div class="level-up-card tutorial-card">
+    <svg class="mascot-owl tutorial-mascot" viewBox="0 0 120 120" aria-hidden="true">
+      <ellipse cx="60" cy="72" rx="40" ry="36" fill="#C68B4A"/>
+      <ellipse cx="60" cy="82" rx="25" ry="21" fill="#F5E1C4"/>
+      <path d="M28 76 Q17 87 24 100 Q32 89 28 76 Z" fill="#5FBFB3"/>
+      <path d="M92 76 Q103 87 96 100 Q88 89 92 76 Z" fill="#5FBFB3"/>
+      <circle cx="42" cy="55" r="17" fill="#FFFFFF" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="78" cy="55" r="17" fill="#FFFFFF" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="44" cy="57" r="7" fill="var(--stamp-ink)"/>
+      <circle cx="80" cy="57" r="7" fill="var(--stamp-ink)"/>
+      <circle cx="47" cy="53.5" r="2.3" fill="#FFFFFF"/>
+      <circle cx="83" cy="53.5" r="2.3" fill="#FFFFFF"/>
+      <ellipse cx="30" cy="66" rx="6" ry="4" fill="#FF9EAE" opacity="0.75"/>
+      <ellipse cx="90" cy="66" rx="6" ry="4" fill="#FF9EAE" opacity="0.75"/>
+      <path d="M54 63 Q60 71 66 63 Q60 68 54 63 Z" fill="#FF9142"/>
+      <path d="M25 44 Q34 27 45 41 Q36 38 25 44 Z" fill="#8A5A2B"/>
+      <path d="M95 44 Q86 27 75 41 Q84 38 95 44 Z" fill="#8A5A2B"/>
+      <rect x="34" y="18" width="52" height="8" rx="1" fill="var(--stamp-ink)"/>
+      <rect x="52" y="10" width="16" height="10" fill="var(--stamp-ink)"/>
+      <line x1="60" y1="26" x2="60" y2="36" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="60" cy="37" r="2.5" fill="var(--stamp-ink)"/>
+    </svg>
+    <p class="tutorial-message">Hi there! Want a quick tour of how version5 works?</p>
+    <div class="tutorial-prompt-actions">
+      <button class="btn btn-primary" id="tutorial-yes-btn">Yes, show me!</button>
+      <button class="btn btn-ghost" id="tutorial-no-btn">No thanks</button>
+    </div>
+  </div>
+</div>
+
+<!-- Tutorial steps overlay -->
+<div id="tutorial-steps-overlay" class="level-up-overlay hidden">
+  <div class="level-up-card tutorial-card">
+    <svg class="mascot-owl tutorial-mascot" viewBox="0 0 120 120" aria-hidden="true">
+      <ellipse cx="60" cy="72" rx="40" ry="36" fill="#C68B4A"/>
+      <ellipse cx="60" cy="82" rx="25" ry="21" fill="#F5E1C4"/>
+      <path d="M28 76 Q17 87 24 100 Q32 89 28 76 Z" fill="#5FBFB3"/>
+      <path d="M92 76 Q103 87 96 100 Q88 89 92 76 Z" fill="#5FBFB3"/>
+      <circle cx="42" cy="55" r="17" fill="#FFFFFF" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="78" cy="55" r="17" fill="#FFFFFF" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="44" cy="57" r="7" fill="var(--stamp-ink)"/>
+      <circle cx="80" cy="57" r="7" fill="var(--stamp-ink)"/>
+      <circle cx="47" cy="53.5" r="2.3" fill="#FFFFFF"/>
+      <circle cx="83" cy="53.5" r="2.3" fill="#FFFFFF"/>
+      <ellipse cx="30" cy="66" rx="6" ry="4" fill="#FF9EAE" opacity="0.75"/>
+      <ellipse cx="90" cy="66" rx="6" ry="4" fill="#FF9EAE" opacity="0.75"/>
+      <path d="M54 63 Q60 71 66 63 Q60 68 54 63 Z" fill="#FF9142"/>
+      <path d="M25 44 Q34 27 45 41 Q36 38 25 44 Z" fill="#8A5A2B"/>
+      <path d="M95 44 Q86 27 75 41 Q84 38 95 44 Z" fill="#8A5A2B"/>
+      <rect x="34" y="18" width="52" height="8" rx="1" fill="var(--stamp-ink)"/>
+      <rect x="52" y="10" width="16" height="10" fill="var(--stamp-ink)"/>
+      <line x1="60" y1="26" x2="60" y2="36" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="60" cy="37" r="2.5" fill="var(--stamp-ink)"/>
+    </svg>
+    <p class="tutorial-step-counter" id="tutorial-step-counter">1 / 8</p>
+    <p class="tutorial-message" id="tutorial-step-text">Step text goes here.</p>
+    <div class="tutorial-prompt-actions">
+      <button class="btn btn-primary" id="tutorial-next-btn">Next</button>
+      <button class="btn btn-ghost" id="tutorial-skip-btn">Skip</button>
+    </div>
+  </div>
+</div>
+
+<!-- Top bar: shown once logged in -->
+<header id="top-bar" class="top-bar hidden">
+  <div id="global-chat-widget" class="global-chat-widget">
+    <button id="global-chat-toggle" class="global-chat-toggle" title="Global chat">💬</button>
+    <div id="global-chat-panel" class="global-chat-panel hidden">
+      <div class="global-chat-header">
+        <span>Global Chat</span>
+        <button id="global-chat-collapse-btn" class="global-chat-collapse-btn" title="Collapse">−</button>
+      </div>
+      <p class="global-chat-notice">Public to everyone signed in. Be kind — messages can be reported.</p>
+      <div id="global-chat-messages" class="global-chat-messages"></div>
+      <form id="global-chat-form" class="global-chat-form">
+        <input type="text" id="global-chat-input" placeholder="Say something..." maxlength="200" autocomplete="off">
+        <button type="submit" class="btn btn-primary global-chat-send-btn">Send</button>
+      </form>
+      <p class="form-error" id="global-chat-error"></p>
+    </div>
+  </div>
+  <div class="top-bar-inner">
+    <button id="theme-toggle-btn" class="theme-toggle" aria-label="Toggle light and dark mode" title="Toggle light/dark mode">🌙</button>
+    <span class="brand">version<span class="brand-accent">5</span></span>
+    <span class="level-badge" id="level-badge">Lv. 1</span>
+    <div class="xp-hud">
+      <span class="xp-label">XP</span>
+      <div class="xp-bar">
+        <div class="xp-bar-fill" id="xp-bar-fill"></div>
+        <div class="xp-bar-ticks"></div>
+      </div>
+      <span class="xp-count" id="xp-count">0</span>
+    </div>
+    <div class="coin-hud" title="Coins — spend them in the Shop">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5c0-1 1-1.8 2.5-1.8s2.5.8 2.5 1.8-1 1.5-2.5 2-2.5 1-2.5 2 1 1.8 2.5 1.8 2.5-.8 2.5-1.8"/></svg>
+      <span id="coin-count">0</span>
+    </div>
+    <div class="top-bar-actions">
+      <button id="settings-icon-btn" class="icon-btn" title="Settings" aria-label="Settings">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span class="icon-btn-label">Settings</span>
+      </button>
+      <button id="profile-icon-btn" class="icon-btn" title="Profile" aria-label="Profile">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>
+        <span class="icon-btn-label">Profile</span>
+      </button>
+      <button id="sign-out-btn" class="btn btn-ghost">Sign out</button>
+    </div>
+  </div>
+  <nav class="main-nav" id="main-nav">
+    <button class="nav-btn active" data-nav="home-section">Home</button>
+    <button class="nav-btn" data-nav="subjects-section">Quests</button>
+    <button class="nav-btn" data-nav="boss-section">Boss Fight</button>
+    <button class="nav-btn" data-nav="missions-section">Missions</button>
+    <button class="nav-btn" data-nav="leaderboard-section">Leaderboard</button>
+    <button class="nav-btn" data-nav="friends-section">Friends</button>
+    <button class="nav-btn" data-nav="duel-section">Battle</button>
+    <button class="nav-btn" data-nav="trivia-section">Trivia</button>
+    <button class="nav-btn" data-nav="achievements-section">Badges</button>
+    <button class="nav-btn" data-nav="shop-section">Shop</button>
+    <button class="nav-btn" data-nav="tutor-section">AI Tutor</button>
+    <button class="nav-btn" data-nav="feedback-section">Feedback</button>
+    <button class="nav-btn nav-pro" data-nav="pro-section">Go Pro</button>
+  </nav>
+</header>
+
+<main id="app">
+
+  <!-- WELCOME CAROUSEL (shown once per device, before auth) -->
+  <section id="banned-section" class="screen hidden">
+    <div class="section-inner banned-inner">
+      <h2 class="section-title">Account Suspended</h2>
+      <p class="section-subtitle">This account has been suspended and can't be used right now. If you think this is a mistake, please reach out for support.</p>
+      <p class="banned-reason" id="banned-reason"></p>
+      <p class="banned-expiry" id="banned-expiry"></p>
+    </div>
+  </section>
+
+  <section id="welcome-carousel-section" class="screen">
+    <div class="section-inner carousel-inner">
+      <div class="carousel-slide" id="carousel-slide-0">
+        <svg class="carousel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5c3-1.5 6-1.5 8 0v14c-2-1.5-5-1.5-8 0V5z"/><path d="M20 5c-3-1.5-6-1.5-8 0v14c2-1.5 5-1.5 8 0V5z"/></svg>
+        <h2 class="carousel-title">Learn</h2>
+        <p class="carousel-text">Pick a subject and work through bite-sized lessons, each teaching one specific topic — not random trivia.</p>
+      </div>
+      <div class="carousel-slide hidden" id="carousel-slide-1">
+        <svg class="carousel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15 9 22 9 16.5 13.5 18.5 21 12 16.5 5.5 21 7.5 13.5 2 9 9 9"/></svg>
+        <h2 class="carousel-title">Earn XP</h2>
+        <p class="carousel-text">Every correct answer earns XP. Level up, unlock harder content, and track your progress across every subject.</p>
+      </div>
+      <div class="carousel-slide hidden" id="carousel-slide-2">
+        <svg class="carousel-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4a4 4 0 0 1-8 0V4z"/><path d="M8 5H5a3 3 0 0 0 3 4"/><path d="M16 5h3a3 3 0 0 1-3 4"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="17" x2="12" y2="20"/></svg>
+        <h2 class="carousel-title">Climb Leagues</h2>
+        <p class="carousel-text">Compete on the weekly leaderboard. Finish in the top of your league to get promoted — fall behind, and you'll drop a league.</p>
+      </div>
+      <div class="carousel-dots">
+        <span class="carousel-dot active" id="carousel-dot-0"></span>
+        <span class="carousel-dot" id="carousel-dot-1"></span>
+        <span class="carousel-dot" id="carousel-dot-2"></span>
+      </div>
+      <div class="carousel-actions">
+        <button class="btn btn-ghost" id="carousel-skip-btn">Skip</button>
+        <button class="btn btn-primary" id="carousel-next-btn">Next</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH SCREEN -->
+  <section id="auth-section" class="screen hidden">
+    <div class="auth-card">
+      <h1 class="logo">version<span class="brand-accent">5</span></h1>
+      <p class="tagline">Turn studying into a game you actually want to play.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="signin">Sign in</button>
+        <button class="auth-tab" data-tab="signup">Create account</button>
+      </div>
+
+      <form id="signin-form" class="auth-form">
+        <label>Email
+          <input type="email" id="signin-email" required autocomplete="email">
+        </label>
+        <label>Password
+          <input type="password" id="signin-password" required autocomplete="current-password">
+        </label>
+        <p class="auth-forgot"><a href="#" id="forgot-password-link">Forgot password?</a></p>
+        <button type="submit" class="btn btn-primary">Sign in</button>
+        <p class="form-error" id="signin-error"></p>
+      </form>
+
+      <form id="forgot-password-form" class="auth-form hidden">
+        <p class="tagline" style="margin-bottom:0;">Enter your email and we'll send you a link to reset your password.</p>
+        <label>Email
+          <input type="email" id="forgot-password-email" required autocomplete="email">
+        </label>
+        <button type="submit" class="btn btn-primary">Send reset link</button>
+        <button type="button" class="btn btn-ghost" id="forgot-password-back-btn">Back to sign in</button>
+        <p class="form-error" id="forgot-password-message"></p>
+      </form>
+
+      <form id="signup-form" class="auth-form hidden">
+        <label>Display name
+          <input type="text" id="signup-name" required autocomplete="nickname">
+        </label>
+        <label>Email
+          <input type="email" id="signup-email" required autocomplete="email">
+        </label>
+        <label>Password
+          <input type="password" id="signup-password" required minlength="6" autocomplete="new-password">
+        </label>
+        <label>Grade level
+          <select id="signup-grade">
+            <option value="elementary">Elementary (Grades 3–5)</option>
+            <option value="middle">Middle School (Grades 6–8)</option>
+            <option value="high" selected>High School (Grades 9–12)</option>
+          </select>
+        </label>
+        <button type="submit" class="btn btn-primary">Create account</button>
+        <p class="form-error" id="signup-error"></p>
+      </form>
+
+      <p class="auth-guest-row"><button type="button" class="btn btn-ghost" id="guest-mode-btn">Continue as Guest</button></p>
+      <p class="auth-guest-note">Guest mode: try quests, battles, and missions without an account. The Shop and AI Tutor are locked, and nothing is saved.</p>
+    </div>
+  </section>
+
+  <!-- HOME SCREEN -->
+  <section id="home-section" class="screen hidden">
+    <div class="section-inner">
+      <div class="mascot-row">
+        <svg class="mascot-owl" viewBox="0 0 120 120" aria-hidden="true">
+          <ellipse cx="60" cy="72" rx="40" ry="36" fill="#C68B4A"/>
+      <ellipse cx="60" cy="82" rx="25" ry="21" fill="#F5E1C4"/>
+      <path d="M28 76 Q17 87 24 100 Q32 89 28 76 Z" fill="#5FBFB3"/>
+      <path d="M92 76 Q103 87 96 100 Q88 89 92 76 Z" fill="#5FBFB3"/>
+      <circle cx="42" cy="55" r="17" fill="#FFFFFF" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="78" cy="55" r="17" fill="#FFFFFF" stroke="var(--stamp-ink)" stroke-width="2"/>
+      <circle cx="44" cy="57" r="7" fill="var(--stamp-ink)"/>
+      <circle cx="80" cy="57" r="7" fill="var(--stamp-ink)"/>
+      <circle cx="47" cy="53.5" r="2.3" fill="#FFFFFF"/>
+      <circle cx="83" cy="53.5" r="2.3" fill="#FFFFFF"/>
+      <ellipse cx="30" cy="66" rx="6" ry="4" fill="#FF9EAE" opacity="0.75"/>
+      <ellipse cx="90" cy="66" rx="6" ry="4" fill="#FF9EAE" opacity="0.75"/>
+      <path d="M54 63 Q60 71 66 63 Q60 68 54 63 Z" fill="#FF9142"/>
+      <path d="M25 44 Q34 27 45 41 Q36 38 25 44 Z" fill="#8A5A2B"/>
+      <path d="M95 44 Q86 27 75 41 Q84 38 95 44 Z" fill="#8A5A2B"/>
+          <rect x="34" y="18" width="52" height="8" rx="1" fill="var(--stamp-ink)"/>
+          <rect x="52" y="10" width="16" height="10" fill="var(--stamp-ink)"/>
+          <line x1="60" y1="26" x2="60" y2="36" stroke="var(--stamp-ink)" stroke-width="2"/>
+          <circle cx="60" cy="37" r="2.5" fill="var(--stamp-ink)"/>
+        </svg>
+        <div class="mascot-bubble">
+          <p id="mascot-message">Ready to learn something new today?</p>
+        </div>
+      </div>
+      <p class="welcome-message" id="welcome-message"></p>
+      <h2 class="section-title">Home</h2>
+      <div class="home-stat-card">
+        <div class="home-stat">
+          <span class="home-stat-label">Level</span>
+          <span class="home-stat-value" id="home-level">1</span>
+        </div>
+        <div class="home-stat">
+          <span class="home-stat-label">Total XP</span>
+          <span class="home-stat-value" id="home-xp">0</span>
+        </div>
+        <div class="home-stat">
+          <span class="home-stat-label">League</span>
+          <span class="home-stat-value" id="home-rank">Bronze</span>
+        </div>
+      </div>
+      <div class="streak-card">
+        <div class="streak-header">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-count-text"><span id="streak-count">0</span> day streak</span>
+        </div>
+        <div class="streak-calendar-strip" id="streak-calendar-strip"></div>
+      </div>
+      <p class="section-subtitle" style="margin-top:28px;">Jump back in</p>
+      <div class="home-shortcut-grid">
+        <button class="quest-card home-shortcut" data-nav="subjects-section"><span class="quest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12l4-8h10l4 8-4 8H7l-4-8z"/><circle cx="12" cy="12" r="2.5"/></svg></span><p class="quest-name">Quests</p></button>
+        <button class="quest-card home-shortcut" data-nav="boss-section"><span class="quest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18h18l-1-9-5 4-3-6-3 6-5-4-1 9z"/></svg></span><p class="quest-name">Boss Fight</p></button>
+        <button class="quest-card home-shortcut" data-nav="missions-section"><span class="quest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="5" y="4" width="14" height="17" rx="2"/><rect x="9" y="2" width="6" height="4" rx="1"/><line x1="8" y1="11" x2="16" y2="11"/><line x1="8" y1="15" x2="13" y2="15"/></svg></span><p class="quest-name">Missions</p></button>
+        <button class="quest-card home-shortcut" data-nav="leaderboard-section"><span class="quest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M8 4h8v4a4 4 0 0 1-8 0V4z"/><path d="M8 5H5a3 3 0 0 0 3 4"/><path d="M16 5h3a3 3 0 0 1-3 4"/><line x1="12" y1="12" x2="12" y2="17"/><line x1="9" y1="20" x2="15" y2="20"/><line x1="12" y1="17" x2="12" y2="20"/></svg></span><p class="quest-name">Leaderboard</p></button>
+        <button class="quest-card home-shortcut" data-nav="tutor-section"><span class="quest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 9l10-5 10 5-10 5-10-5z"/><path d="M6 11v5c0 1.5 3 3 6 3s6-1.5 6-3v-5"/></svg></span><p class="quest-name">AI Tutor</p></button>
+        <button class="quest-card home-shortcut" data-nav="duel-section"><span class="quest-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="20" x2="14" y2="10"/><line x1="20" y1="4" x2="10" y2="14"/><line x1="4" y1="4" x2="20" y2="20"/></svg></span><p class="quest-name">Battle</p></button>
+      </div>
+    </div>
+  </section>
+
+  <!-- SUBJECT SELECT SCREEN -->
+  <section id="subjects-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Choose your quest</h2>
+      <p class="section-subtitle">Pick a subject. Answer 5 questions. Earn XP.</p>
+      <div class="grade-selector-row">
+        <label for="grade-select">Grade level:</label>
+        <select id="grade-select"></select>
+      </div>
+      <div class="quest-grid" id="quest-grid"></div>
+      <div class="ad-banner" id="ad-banner-subjects">
+        <span>📢 Advertisement — <a href="#" data-nav="pro-section" class="ad-link">Go Pro to remove ads</a></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- CHAPTER SELECT SCREEN -->
+  <section id="chapters-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="chapters-back-btn">← Back to subjects</button>
+      <h2 class="section-title" id="chapters-heading">Chapters</h2>
+      <p class="section-subtitle">Each chapter gets harder. Complete one to unlock the next.</p>
+      <div class="quest-grid" id="chapters-grid"></div>
+    </div>
+  </section>
+
+  <!-- ROADMAP SCREEN (structured, lesson-by-lesson Quests) -->
+  <section id="roadmap-section" class="screen hidden">
+    <div class="section-inner roadmap-inner">
+      <button class="btn btn-ghost chapters-back" id="roadmap-back-btn">← Back to subjects</button>
+      <p class="roadmap-toast hidden" id="roadmap-toast"></p>
+
+      <div id="lesson-complete-overlay" class="modal-overlay hidden">
+        <div class="lesson-complete-card">
+          <p class="lesson-complete-title" id="lesson-complete-title">Lesson Complete!</p>
+          <p class="lesson-complete-score" id="lesson-complete-score"></p>
+          <div class="lesson-complete-xp-row">
+            <span class="lesson-complete-xp-icon">⚡</span>
+            <span class="lesson-complete-xp-number" id="lesson-complete-xp-number">0</span>
+            <span class="lesson-complete-xp-label">XP</span>
+          </div>
+          <p class="lesson-complete-unlock hidden" id="lesson-complete-unlock">🔓 Next lesson unlocked!</p>
+          <button class="btn btn-primary" id="lesson-complete-continue-btn">Continue</button>
+        </div>
+      </div>
+
+      <div id="leaderboard-rankup-overlay" class="modal-overlay hidden">
+        <div class="leaderboard-rankup-card">
+          <p class="leaderboard-rankup-title">📈 You moved up the leaderboard!</p>
+          <div class="leaderboard-rankup-positions">
+            <span class="leaderboard-rankup-pos" id="leaderboard-rankup-from"></span>
+            <span class="leaderboard-rankup-arrow">→</span>
+            <span class="leaderboard-rankup-pos leaderboard-rankup-pos-new" id="leaderboard-rankup-to"></span>
+          </div>
+          <button class="btn btn-primary" id="leaderboard-rankup-close-btn">Nice!</button>
+        </div>
+      </div>
+      <h2 class="section-title" id="roadmap-heading">version5</h2>
+      <p class="section-subtitle">Ten lessons, each teaching one specific topic. Complete one to unlock the next.</p>
+      <div class="roadmap-path" id="roadmap-path"></div>
+    </div>
+  </section>
+
+  <!-- CONCEPT INTRO SCREEN (shown before a chapter's questions) -->
+  <section id="concept-section" class="screen hidden">
+    <div class="section-inner concept-inner">
+      <p class="quiz-subject-tag" id="concept-subject-tag"></p>
+      <h2 class="section-title" id="concept-heading">Before you start...</h2>
+      <p class="concept-text" id="concept-text"></p>
+      <button class="btn btn-primary" id="concept-start-btn">Start practice</button>
+    </div>
+  </section>
+
+  <!-- QUIZ SCREEN (shared by quests, boss fights, and battles) -->
+  <section id="quiz-section" class="screen hidden">
+    <div class="section-inner quiz-inner">
+      <div class="quiz-topbar">
+        <button class="btn btn-ghost quiz-exit-btn" id="quiz-exit-btn">✕ Exit</button>
+        <button class="btn btn-ghost ollie-hint-btn" id="ollie-hint-btn">🦉 Stuck? Ask Ollie</button>
+      </div>
+
+      <div id="ollie-hint-panel" class="ollie-hint-panel hidden">
+        <div class="ollie-hint-mascot" id="ollie-hint-mascot"></div>
+        <p class="ollie-hint-text" id="ollie-hint-text"></p>
+        <button class="btn btn-ghost" id="ollie-hint-close-btn">Thanks, Ollie!</button>
+      </div>
+      <div class="quiz-progress">
+        <span id="quiz-progress-label">Question 1 of 5</span>
+        <div class="quiz-progress-bar">
+          <div class="quiz-progress-fill" id="quiz-progress-fill"></div>
+        </div>
+      </div>
+
+      <div class="hearts-hud hidden" id="hearts-hud"></div>
+      <div class="battle-live-hud hidden" id="battle-live-hud"></div>
+
+      <div id="duel-chat-widget" class="duel-chat-widget hidden">
+        <button id="duel-chat-toggle" class="btn btn-ghost duel-chat-toggle-btn">💬 Battle Chat</button>
+        <div id="duel-chat-panel" class="duel-chat-panel hidden">
+          <div id="duel-chat-messages" class="global-chat-messages duel-chat-messages"></div>
+          <form id="duel-chat-form" class="global-chat-form">
+            <input type="text" id="duel-chat-input" placeholder="Say something to your opponent..." maxlength="200" autocomplete="off">
+            <button type="submit" class="btn btn-primary global-chat-send-btn">Send</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="concept-intro-card hidden" id="concept-intro-card">
+        <p class="concept-intro-label">💡 Quick concept</p>
+        <p class="concept-intro-text" id="concept-intro-text"></p>
+        <p class="concept-intro-scroll-hint">↓ Scroll down when you're ready to answer</p>
+      </div>
+
+      <div class="quiz-card">
+        <p class="quiz-subject-tag" id="quiz-subject-tag"></p>
+        <h3 class="quiz-question" id="quiz-question"></h3>
+        <div class="quiz-options" id="quiz-options"></div>
+        <div class="interactive-widget-container hidden" id="interactive-widget-container"></div>
+        <button class="btn btn-primary hidden" id="quiz-confirm-btn">Confirm answer</button>
+        <p class="quiz-feedback" id="quiz-feedback"></p>
+        <button class="btn btn-ghost hidden" id="quiz-explain-btn">Explain this</button>
+        <button class="btn btn-ghost hidden" id="quiz-retry-hint-btn">🦉 Ask Ollie for a hint</button>
+        <p class="quiz-explanation hidden" id="quiz-explanation"></p>
+        <button class="btn btn-primary hidden" id="quiz-next-btn">Next question</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- RESULTS SCREEN -->
+  <section id="results-section" class="screen hidden">
+    <div class="section-inner results-inner">
+      <p class="results-eyebrow" id="results-eyebrow">Quest complete</p>
+      <h2 class="results-score" id="results-score">0 / 5</h2>
+      <p class="results-xp-gain" id="results-xp-gain">+0 XP</p>
+      <p class="results-upsell hidden" id="results-upsell">Purchase Pro version to continue</p>
+      <p class="results-message" id="results-message"></p>
+      <div class="results-actions">
+        <button class="btn btn-primary" id="results-again-btn">Back to Quests</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- BOSS FIGHT SCREEN -->
+  <section id="boss-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Boss Fight</h2>
+      <p class="section-subtitle">Exam-level questions. 5 hearts. Miss 5 and you're defeated. Each win makes the boss tougher.</p>
+      <div class="quest-grid" id="boss-grid"></div>
+    </div>
+  </section>
+
+  <!-- MISSIONS SCREEN -->
+  <section id="missions-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Daily Missions</h2>
+      <p class="section-subtitle">Complete missions for bonus XP. Resets every day.</p>
+      <div class="mission-card" id="mission-card"></div>
+    </div>
+  </section>
+
+  <!-- LEADERBOARD SCREEN -->
+  <section id="leaderboard-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Leaderboard</h2>
+      <p class="section-subtitle">Top students by total XP.</p>
+      <div class="leaderboard-list" id="leaderboard-list">
+        <p class="leaderboard-loading">Loading leaderboard…</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- FRIENDS SCREEN -->
+  <section id="friends-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Friends</h2>
+      <p class="section-subtitle">Add friends by email, and manage who you've blocked.</p>
+
+      <div class="friends-add-row">
+        <input type="email" id="friend-add-email" placeholder="friend@example.com">
+        <button class="btn btn-primary" id="friend-add-btn">Add Friend</button>
+      </div>
+      <p class="form-error" id="friends-status"></p>
+
+      <h3 class="settings-heading">Your Friends</h3>
+      <div id="friends-list" class="friends-list"></div>
+
+      <h3 class="settings-heading">Blocked</h3>
+      <div id="blocked-list" class="friends-list"></div>
+    </div>
+  </section>
+
+  <!-- DUEL SCREEN -->
+  <section id="duel-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Battle</h2>
+      <p class="section-subtitle">Challenge a friend — same 5 questions, highest score wins.</p>
+      <button class="btn btn-ghost tutor-photo-help-link" id="battle-team-battle-link">👥 Team Battle — 2v2, combined score wins</button>
+
+      <div id="duel-menu" class="duel-panel">
+        <div class="duel-create">
+          <h3 class="duel-subheading">Start a battle</h3>
+          <div class="duel-subject-grid" id="duel-subject-grid"></div>
+          <button class="btn btn-primary" id="duel-create-btn">Create battle</button>
+        </div>
+        <div class="duel-join">
+          <h3 class="duel-subheading">Join a battle</h3>
+          <input type="text" id="duel-code-input" placeholder="Enter battle code" class="duel-input">
+          <button class="btn btn-primary" id="duel-join-btn">Join battle</button>
+        </div>
+        <p class="form-error" id="duel-error"></p>
+      </div>
+
+      <div id="duel-waiting" class="duel-panel hidden">
+        <p class="duel-subheading">Share this code with your friend:</p>
+        <p class="duel-code" id="duel-code-display"></p>
+        <p class="duel-status" id="duel-waiting-status">Waiting for opponent to finish…</p>
+      </div>
+
+      <div id="duel-result" class="duel-panel hidden">
+        <h3 class="duel-subheading">Battle result</h3>
+        <div class="duel-result-row" id="duel-result-creator"></div>
+        <div class="duel-result-row" id="duel-result-opponent"></div>
+        <p class="duel-winner" id="duel-winner-text"></p>
+        <button class="btn btn-primary" id="duel-back-btn">Back to Battle menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- TEAM BATTLE SCREEN (2v2, live) -->
+  <section id="team-battle-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="team-battle-back-to-battle-btn">← Back to Battle</button>
+      <h2 class="section-title">Team Battle</h2>
+      <p class="section-subtitle">2v2 — your team's combined score decides the winner.</p>
+      <p class="form-error" id="team-battle-error"></p>
+
+      <div id="team-battle-menu" class="duel-panel">
+        <h3 class="duel-subheading">Choose a subject</h3>
+        <div class="duel-subject-grid" id="team-battle-subject-grid"></div>
+        <button class="btn btn-primary" id="team-battle-create-btn">Create a Team Battle</button>
+
+        <h3 class="duel-subheading">Join a Team Battle</h3>
+        <input type="text" id="team-battle-code-input" placeholder="Enter battle code" maxlength="12">
+        <button class="btn btn-primary" id="team-battle-join-btn">Join</button>
+      </div>
+
+      <div id="team-battle-waiting" class="duel-panel hidden">
+        <h3 class="duel-subheading">Waiting for players</h3>
+        <p>Share this code:</p>
+        <p class="duel-code" id="team-battle-code-display"></p>
+        <div class="team-battle-teams">
+          <div class="team-battle-team-col">
+            <p class="team-battle-team-label">Team A</p>
+            <div id="team-battle-team-a-list" class="team-battle-player-list"></div>
+            <button class="btn btn-ghost team-battle-join-team-btn" id="team-battle-join-a-btn" data-team="A">Join Team A</button>
+          </div>
+          <div class="team-battle-team-col">
+            <p class="team-battle-team-label">Team B</p>
+            <div id="team-battle-team-b-list" class="team-battle-player-list"></div>
+            <button class="btn btn-ghost team-battle-join-team-btn" id="team-battle-join-b-btn" data-team="B">Join Team B</button>
+          </div>
+        </div>
+        <p class="team-battle-waiting-status" id="team-battle-waiting-status"></p>
+        <button class="btn btn-ghost" id="team-battle-cancel-btn">Cancel</button>
+      </div>
+
+      <div id="team-battle-result" class="duel-panel hidden">
+        <h3 class="duel-subheading">Team Battle result</h3>
+        <div class="duel-result-row" id="team-battle-result-a"></div>
+        <div class="duel-result-row" id="team-battle-result-b"></div>
+        <p class="duel-winner" id="team-battle-winner-text"></p>
+        <button class="btn btn-primary" id="team-battle-back-btn">Back to Team Battle menu</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI TUTOR SCREEN -->
+  <section id="tutor-section" class="screen hidden">
+    <div class="section-inner tutor-chat-inner">
+      <h2 class="section-title">AI Tutor</h2>
+      <p class="section-subtitle">Tell it what you're stuck on — it'll explain, and can give you a practice question when you're ready.</p>
+      <button class="btn btn-ghost tutor-photo-help-link" id="tutor-photo-help-link">📷 Photo Help — upload a photo of your work (Ultra)</button>
+      <button class="btn btn-ghost tutor-photo-help-link" id="tutor-study-mode-link">📚 Study Mode — a custom AI-generated course (Pro/Ultra)</button>
+      <p class="tutor-usage-note" id="tutor-usage-note"></p>
+      <div class="chat-messages" id="chat-messages"></div>
+      <form id="chat-input-form" class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="e.g. I don't understand fractions" autocomplete="off">
+        <button type="submit" class="btn btn-primary" id="chat-send-btn">Send</button>
+      </form>
+    </div>
+  </section>
+
+  <!-- TRIVIA SCREEN -->
+  <section id="trivia-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Trivia</h2>
+      <p class="section-subtitle">Pick a subject for 5 random questions — no roadmap, just quick trivia.</p>
+      <div class="quest-grid" id="trivia-grid"></div>
+    </div>
+  </section>
+
+  <!-- ACHIEVEMENTS SCREEN -->
+  <section id="achievements-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Badges</h2>
+      <p class="section-subtitle" id="achievements-progress">0 / 0 unlocked</p>
+      <div class="achievements-grid" id="achievements-grid"></div>
+    </div>
+  </section>
+
+  <!-- SHOP SCREEN -->
+  <section id="shop-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Shop</h2>
+      <p class="section-subtitle">Spend coins earned from Daily Missions.</p>
+      <div class="shop-balance">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5c0-1 1-1.8 2.5-1.8s2.5.8 2.5 1.8-1 1.5-2.5 2-2.5 1-2.5 2 1 1.8 2.5 1.8 2.5-.8 2.5-1.8"/></svg>
+        <span id="shop-coin-balance">0</span> coins
+      </div>
+
+      <div class="daily-spin-card">
+        <h3 class="settings-heading daily-spin-heading">Daily Spin <span class="daily-spin-beta-badge">BETA</span></h3>
+        <p class="settings-note">One free spin per day — could be nothing, an XP boost, or 500 coins.</p>
+        <div class="daily-spin-wheel-wrap">
+          <div class="daily-spin-pointer">▼</div>
+          <div id="daily-spin-wheel" class="daily-spin-wheel"></div>
+        </div>
+        <button class="btn btn-primary" id="daily-spin-btn">Spin!</button>
+        <p class="daily-spin-result" id="daily-spin-result"></p>
+      </div>
+
+      <h3 class="settings-heading rotating-shop-heading">🔄 Today's Featured Deals <span class="rotating-shop-note">— new picks tomorrow</span></h3>
+      <div class="shop-category-grid rotating-shop-grid" id="rotating-shop-grid"></div>
+
+      <div class="shop-grid" id="shop-grid"></div>
+      <p class="form-error" id="shop-status"></p>
+    </div>
+
+    <div id="shop-preview-modal" class="modal-overlay hidden">
+      <div class="modal-card">
+        <button class="modal-close-btn" id="shop-preview-close-btn">×</button>
+        <h3 id="shop-preview-title"></h3>
+        <div id="shop-preview-body" class="shop-preview-body"></div>
+        <button class="btn btn-primary" id="shop-preview-buy-btn"></button>
+        <button class="btn btn-ghost" id="shop-preview-real-money-btn"></button>
+        <button class="btn btn-ghost" id="shop-preview-gift-btn">🎁 Gift this to a friend</button>
+        <div id="shop-gift-form" class="shop-gift-form hidden">
+          <input type="email" id="shop-gift-email-input" placeholder="Friend's email address">
+          <button class="btn btn-primary" id="shop-gift-send-btn">Send Gift</button>
+          <p class="form-error" id="shop-gift-status"></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PHOTO HELP SCREEN (Ultra only) -->
+  <section id="photo-help-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="photo-help-back-btn">← Back to AI Tutor</button>
+      <h2 class="section-title">Photo Help</h2>
+      <p class="section-subtitle">Upload a photo of your work — Gemini finds mistakes and explains how to fix them.</p>
+
+      <div id="photo-help-locked" class="photo-help-locked hidden">
+        <p>Photo Help is an Ultra feature.</p>
+        <button class="btn btn-primary" id="photo-help-upgrade-btn">See Ultra</button>
+      </div>
+
+      <div id="photo-help-unlocked" class="hidden">
+        <div class="photo-upload-row">
+          <input type="file" id="photo-help-input" accept="image/*" capture="environment">
+          <select id="photo-help-subject">
+            <option value="">Subject (optional)</option>
+          </select>
+        </div>
+        <img id="photo-help-preview" class="photo-help-preview hidden" alt="Selected homework photo">
+        <button class="btn btn-primary" id="photo-help-submit-btn" disabled>Analyze this photo</button>
+        <div id="photo-help-result" class="photo-help-result hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDY MODE SETUP (Pro/Ultra) -->
+  <section id="study-mode-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="study-mode-back-btn">← Back to AI Tutor</button>
+      <h2 class="section-title">Study Mode</h2>
+      <p class="section-subtitle">Tell the AI your curriculum and grade, and it'll build you a custom 5-chapter course.</p>
+
+      <div id="study-mode-locked" class="photo-help-locked hidden">
+        <p>Study Mode is a Pro/Ultra feature.</p>
+        <button class="btn btn-primary" id="study-mode-upgrade-btn">See Pro</button>
+      </div>
+
+      <div id="study-mode-unlocked" class="hidden">
+        <div id="study-mode-setup-form">
+          <label>What do you want to study? Include your curriculum if you have one.
+            <textarea id="study-mode-curriculum" rows="4" placeholder="e.g. AP Biology, unit on cellular respiration and photosynthesis"></textarea>
+          </label>
+          <label>Grade level
+            <select id="study-mode-grade">
+              <option value="elementary">Elementary (Grades 3–5)</option>
+              <option value="middle">Middle School (Grades 6–8)</option>
+              <option value="high" selected>High School (Grades 9–12)</option>
+            </select>
+          </label>
+          <button class="btn btn-primary" id="study-mode-generate-btn">Generate my course</button>
+          <p class="form-error" id="study-mode-status"></p>
+        </div>
+
+        <div id="study-mode-existing-course" class="hidden">
+          <p class="study-mode-existing-name" id="study-mode-existing-name"></p>
+          <button class="btn btn-primary" id="study-mode-continue-btn">Continue this course</button>
+          <button class="btn btn-ghost" id="study-mode-new-course-btn">Start a different course instead</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- STUDY MODE ROADMAP -->
+  <section id="study-mode-roadmap-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="study-mode-roadmap-back-btn">← Back to Study Mode</button>
+      <h2 class="section-title" id="study-mode-roadmap-heading">Your Course</h2>
+      <div class="roadmap-path" id="study-mode-roadmap-path"></div>
+    </div>
+  </section>
+
+  <!-- STUDY MODE COMPLETION FEEDBACK -->
+  <div id="study-mode-feedback-overlay" class="modal-overlay hidden">
+    <div class="modal-card study-mode-feedback-card">
+      <h3>🎓 Course Complete!</h3>
+      <p id="study-mode-feedback-text">Thinking about how you did...</p>
+      <button class="btn btn-primary" id="study-mode-feedback-close-btn">Done</button>
+    </div>
+  </div>
+
+  <!-- SETTINGS SCREEN -->
+  <section id="settings-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Settings</h2>
+      <p class="section-subtitle">Customize how version5 looks and sounds.</p>
+
+      <h3 class="settings-heading">Background</h3>
+      <div class="bg-theme-grid" id="bg-theme-grid"></div>
+
+      <h3 class="settings-heading">Game Music</h3>
+      <p class="settings-note">Instrumental only, generated for this app — no external audio files.</p>
+      <div class="music-picker" id="music-picker"></div>
+      <div class="volume-row">
+        <label for="music-volume">Volume</label>
+        <input type="range" id="music-volume" min="0" max="1" step="0.05" value="0.5">
+      </div>
+
+      <h3 class="settings-heading">Gameplay</h3>
+      <label class="toggle-row">
+        <input type="checkbox" id="disable-interactive-toggle">
+        <span>Turn off interactive questions (drag/reorder puzzles) — use standard multiple choice only</span>
+      </label>
+
+      <h3 class="settings-heading">Ollie's Voice</h3>
+      <p class="settings-note">Ollie reads hints aloud using your browser's built-in text-to-speech.</p>
+      <div class="ollie-voice-options">
+        <label class="ollie-voice-option">
+          <input type="radio" name="ollie-voice" id="ollie-voice-soft" value="soft" checked>
+          <span>🙂 Soft</span>
+        </label>
+        <label class="ollie-voice-option">
+          <input type="radio" name="ollie-voice" id="ollie-voice-deep" value="deep">
+          <span>🦉 Deep</span>
+        </label>
+        <label class="ollie-voice-option">
+          <input type="radio" name="ollie-voice" id="ollie-voice-off" value="off">
+          <span>🔇 Off (text only)</span>
+        </label>
+      </div>
+
+      <p class="admin-link-row"><button class="btn btn-ghost admin-link-btn" id="admin-panel-link">Admin panel</button></p>
+    </div>
+  </section>
+
+  <!-- ADMIN SCREEN — the button above is visible to everyone, but the
+       actual grant only works for whoever is authorized server-side
+       (see handleAdminGrant + the ADMIN_EMAILS secret). Anyone else
+       gets a clear "not authorized" message. -->
+  <section id="admin-section" class="screen hidden">
+    <div class="section-inner">
+      <button class="btn btn-ghost chapters-back" id="admin-back-btn">← Back to Settings</button>
+      <h2 class="section-title">Admin Panel</h2>
+      <p class="section-subtitle">Grant Pro, Ultra, or coins to any account by email or username.</p>
+
+      <div class="admin-form">
+        <label>Target account — email or username</label>
+        <input type="text" id="admin-target-email" placeholder="user@example.com or their display name">
+        <button type="button" class="btn btn-ghost" id="admin-resolve-username-btn">Find account</button>
+        <p class="admin-resolved-note" id="admin-resolved-note"></p>
+
+        <div id="admin-username-picker" class="admin-username-picker hidden"></div>
+
+        <label class="toggle-row"><input type="checkbox" id="admin-grant-pro"><span>Grant Pro</span></label>
+        <label class="toggle-row"><input type="checkbox" id="admin-grant-ultra"><span>Grant Ultra</span></label>
+
+        <label>Add coins (optional, can be negative)</label>
+        <input type="number" id="admin-coins-amount" placeholder="0">
+
+        <button class="btn btn-primary" id="admin-submit-btn">Apply</button>
+
+        <div class="admin-ban-section">
+          <label>Ban duration</label>
+          <select id="admin-ban-duration">
+            <option value="1">1 day</option>
+            <option value="3">3 days</option>
+            <option value="7" selected>7 days</option>
+            <option value="30">30 days</option>
+            <option value="0">Permanent</option>
+          </select>
+
+          <label>Reason (shown to the banned user)</label>
+          <textarea id="admin-ban-reason" rows="2" placeholder="e.g. Repeated harassment in chat"></textarea>
+
+          <div class="admin-ban-row">
+            <button class="btn btn-ghost admin-ban-btn" id="admin-ban-btn">🚫 Ban this account</button>
+            <button class="btn btn-ghost admin-unban-btn" id="admin-unban-btn">Unban this account</button>
+          </div>
+        </div>
+        <p class="form-error" id="admin-status"></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- PROFILE SCREEN -->
+  <section id="profile-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Profile</h2>
+      <p class="section-subtitle">Your account details.</p>
+
+      <h3 class="settings-heading" style="margin-top:8px;">Customize</h3>
+      <div id="profile-customize" class="profile-customize"></div>
+
+      <div class="profile-card">
+        <div class="profile-row">
+          <span class="profile-label">Username</span>
+          <span class="profile-value" id="profile-username">—</span>
+        </div>
+        <div class="profile-row">
+          <span class="profile-label">Email</span>
+          <span class="profile-value" id="profile-email">—</span>
+        </div>
+      </div>
+
+      <h3 class="settings-heading">Change Password</h3>
+      <form id="change-password-form" class="feedback-card">
+        <label>Current password
+          <input type="password" id="current-password" required autocomplete="current-password">
+        </label>
+        <label>New password
+          <input type="password" id="new-password" required minlength="6" autocomplete="new-password">
+        </label>
+        <label>Confirm new password
+          <input type="password" id="confirm-new-password" required minlength="6" autocomplete="new-password">
+        </label>
+        <button type="submit" class="btn btn-primary">Update password</button>
+        <p class="form-error" id="password-change-status"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- FEEDBACK SCREEN -->
+  <section id="feedback-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">Feedback</h2>
+      <p class="section-subtitle">Found a bug, or have an idea? Let us know.</p>
+      <form id="feedback-form" class="feedback-card">
+        <textarea id="feedback-message" rows="6" placeholder="What's on your mind?" required></textarea>
+        <button type="submit" class="btn btn-primary" id="feedback-submit-btn">Send feedback</button>
+        <p class="form-error" id="feedback-status"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- GO PRO SCREEN -->
+  <section id="pro-section" class="screen hidden">
+    <div class="section-inner">
+      <h2 class="section-title">version5 Pro</h2>
+      <p class="section-subtitle">$5.99/month — unlimited AI Tutor questions and no ads.</p>
+      <div class="pro-card" id="pro-card"></div>
+    </div>
+  </section>
+
+</main>
+
+<script src="js/theme.js"></script>
+<!-- Firebase SDKs (v9 compat build — simplest for a single-file no-build setup) -->
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.0/firebase-firestore-compat.js"></script>
+
+<script src="js/firebase-config.js"></script>
+<script src="js/questions.js"></script>
+<script src="js/cosmetics.js"></script>
+<script src="js/interactive.js"></script>
+<script src="js/trivia.js"></script>
+<script src="js/shop.js"></script>
+<script src="js/ultra-photo.js"></script>
+<script src="js/music.js"></script>
+<script src="js/settings.js"></script>
+<script src="js/admin.js"></script>
+<script src="js/profile.js"></script>
+<script src="js/onboarding.js"></script>
+<script src="js/onboarding-carousel.js"></script>
+<script src="js/app.js"></script>
+<script src="js/boss.js"></script>
+<script src="js/missions.js"></script>
+<script src="js/leaderboard.js"></script>
+<script src="js/friends.js"></script>
+<script src="js/global-chat.js"></script>
+<script src="js/achievements.js"></script>
+<script src="js/duels.js"></script>
+<script src="js/team-battles.js"></script>
+<script src="js/tutor.js"></script>
+<script src="js/study-mode.js"></script>
+<script src="js/worker-api.js"></script>
+<script src="js/ai-tutor-gemini.js"></script>
+<script src="js/pro.js"></script>
+</body>
+</html>

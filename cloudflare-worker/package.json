@@ -1,0 +1,17 @@
+{
+  "name": "brain-quest-api",
+  "description": "Cloudflare Worker backend for Brain Quest — Gemini AI + Stripe payments, no Firebase Blaze required.",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy"
+  },
+  "dependencies": {
+    "jose": "^5.0.0",
+    "stripe": "^16.0.0"
+  },
+  "devDependencies": {
+    "wrangler": "^3.0.0"
+  }
+}
