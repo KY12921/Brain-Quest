@@ -1,0 +1,227 @@
+rules_version = '2';
+
+// ------------------------------------------------------------------
+// Brain Quest / version5 — Firestore security rules.
+//
+// Deploy: Firebase Console → Firestore Database → Rules → paste this
+// whole file → Publish. (Or `firebase deploy --only firestore:rules`,
+// using the "firestore" entry in firebase.json.)
+//
+// Model, built around how the app actually uses Firestore:
+//   * Nothing is readable without signing in.
+//   * users/{uid} (the full account: email, coins, purchases, bans…) is
+//     readable ONLY by its owner. Other players never read it — the
+//     leaderboards read publicProfiles instead.
+//   * publicProfiles/{uid} holds only what other players are meant to
+//     see: display name, XP, weekly XP, league, equipped cosmetics and a
+//     lesson count. No email.
+//   * The browser may only change "progress" fields on its own account.
+//     Coins, Pro/Ultra, owned cosmetics, badge rewards, bans, friends
+//     and clans can only be changed by the Val Town backend (it uses a
+//     service account, which bypasses these rules).
+//   * Every other collection requires sign-in and only allows the
+//     writes the app really makes.
+//
+// Known limit (unchanged from before, documented in the README): XP and
+// lesson progress are still reported by the browser, so a determined
+// user can inflate their own XP. What they can no longer do is grant
+// themselves coins, Pro/Ultra, cosmetics, or touch anyone else's data.
+// ------------------------------------------------------------------
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function signedIn() {
+      return request.auth != null;
+    }
+    function isSelf(uid) {
+      return signedIn() && request.auth.uid == uid;
+    }
+    function changedKeys() {
+      return request.resource.data.diff(resource.data).affectedKeys();
+    }
+
+    // ---------- users/{uid}: private account document ----------
+
+    // Fields the app writes from the browser during normal play.
+    function clientWritableUserFields() {
+      return [
+        'name', 'email', 'gradeLevel', 'language', 'hasSeenTutorial',
+        'chapterProgress', 'lessonProgress', 'completedSubjects',
+        'missionDate', 'missionProgress', 'missionClaimed',
+        'subjectStats', 'aiTutorDate', 'aiTutorUsesToday', 'tutorLevel',
+        'rank', 'weeklyXP', 'weekId', 'xp',
+        'streakCount', 'lastActiveDate', 'activeDates', 'streakFreezes',
+        'perfectLessons', 'totalCorrectAnswers', 'lifetimeBattlesWon',
+        'studyModeCourse', 'studyModePerformance',
+        'equipped', 'xpBoost', 'clanId', 'clanName'
+      ];
+    }
+
+    function emailOk() {
+      return !('email' in changedKeys())
+        || request.resource.data.email == request.auth.token.email;
+    }
+
+    // An XP boost is bought through the backend; the browser may only
+    // count its uses down or clear it.
+    function xpBoostOk() {
+      let oldBoost = resource.data.get('xpBoost', null);
+      let newBoost = request.resource.data.get('xpBoost', null);
+      return !('xpBoost' in changedKeys())
+        || newBoost == null
+        || (oldBoost != null
+            && newBoost.keys().hasOnly(['multiplier', 'usesRemaining'])
+            && newBoost.multiplier == oldBoost.multiplier
+            && newBoost.usesRemaining < oldBoost.usesRemaining);
+    }
+
+    // Streak freezes are bought through the backend; the browser may
+    // only use one up (decrease).
+    function streakFreezesOk() {
+      let n = request.resource.data.get('streakFreezes', 0);
+      return !('streakFreezes' in changedKeys())
+        || (n is int && n >= 0 && n < resource.data.get('streakFreezes', 0));
+    }
+
+    // Joining/leaving clans goes through the backend. The browser may
+    // only clear a stale reference to a clan that no longer exists.
+    function clanOk() {
+      return !(changedKeys().hasAny(['clanId', 'clanName']))
+        || (request.resource.data.get('clanId', null) == null
+            && request.resource.data.get('clanName', null) == null);
+    }
+
+    // You can only equip a cosmetic you actually own (or the default).
+    function slotOk(slot, category, defaultId) {
+      let value = request.resource.data.equipped.get(slot, defaultId);
+      return value == defaultId
+        || value in resource.data.get('ownedCosmetics', {}).get(category, []);
+    }
+    function equippedOk() {
+      return !('equipped' in changedKeys())
+        || (request.resource.data.equipped.keys().hasOnly(['avatarIcon', 'frame', 'decoration', 'nameplate'])
+            && slotOk('avatarIcon', 'avatarIcons', 'default')
+            && slotOk('frame', 'frames', 'none')
+            && slotOk('decoration', 'decorations', 'none')
+            && slotOk('nameplate', 'nameplates', 'default'));
+    }
+
+    // A brand-new account must start with every protected field at its
+    // default — no starting yourself off with coins or Pro.
+    function newAccountOk() {
+      let d = request.resource.data;
+      return d.get('isPro', false) == false
+        && d.get('isUltra', false) == false
+        && d.get('coins', 0) == 0
+        && d.get('lifetimeCoinsSpent', 0) == 0
+        && d.get('streakFreezes', 0) == 0
+        && d.get('xpBoost', null) == null
+        && d.get('tempProUntil', null) == null
+        && d.get('lastSpinDate', null) == null
+        && d.get('lastUltraCoinBonusDate', null) == null
+        && d.get('claimedAchievementRewards', []).size() == 0
+        && d.get('ownedCosmetics', {'avatarIcons': [], 'frames': [], 'decorations': [], 'nameplates': [], 'themes': [], 'music': []})
+             == {'avatarIcons': [], 'frames': [], 'decorations': [], 'nameplates': [], 'themes': [], 'music': []}
+        && d.get('banned', false) == false
+        && d.get('bannedUntil', null) == null
+        && d.get('banReason', null) == null
+        && d.get('friends', []).size() == 0
+        && d.get('blockedUsers', []).size() == 0
+        && d.get('clanId', null) == null
+        && d.get('clanName', null) == null
+        && !d.keys().hasAny(['stripeCustomerId', 'missionRewardClaims'])
+        && (!('email' in d) || d.email == request.auth.token.email);
+    }
+
+    match /users/{userId} {
+      allow read: if isSelf(userId);
+      allow create: if isSelf(userId) && newAccountOk();
+      allow update: if isSelf(userId)
+        && changedKeys().hasOnly(clientWritableUserFields())
+        && emailOk() && xpBoostOk() && streakFreezesOk() && clanOk() && equippedOk();
+      allow delete: if false;
+    }
+
+    // ---------- publicProfiles/{uid}: what other players can see ----------
+    match /publicProfiles/{userId} {
+      allow read: if signedIn();
+      allow create, update: if isSelf(userId)
+        && request.resource.data.keys().hasOnly(['name', 'xp', 'weeklyXP', 'rank', 'weekId', 'equipped', 'lessonsCompleted', 'updatedAt'])
+        && request.resource.data.name is string
+        && request.resource.data.name.size() <= 40;
+      allow delete: if isSelf(userId);
+    }
+
+    // ---------- Battles ----------
+    match /duels/{duelId} {
+      allow read: if signedIn();
+      // Quick Match creates the duel on behalf of the queued player, so
+      // either participant may create it.
+      allow create: if signedIn()
+        && (request.resource.data.creatorUid == request.auth.uid
+            || request.resource.data.opponentUid == request.auth.uid);
+      allow update: if signedIn()
+        && (request.auth.uid == resource.data.creatorUid
+            || request.auth.uid == resource.data.opponentUid
+            || (resource.data.opponentUid == null && request.resource.data.opponentUid == request.auth.uid));
+      allow delete: if false;
+    }
+
+    match /duelChat/{messageId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 200;
+      allow update, delete: if false;
+    }
+
+    // Team rosters are arrays of player objects, which rules can't
+    // search by uid, so updates are limited to signed-in players (the
+    // same trust level as before, minus anonymous internet access).
+    match /teamBattles/{battleId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.teamA[0].uid == request.auth.uid;
+      allow update: if signedIn();
+      allow delete: if false;
+    }
+
+    match /matchmakingQueue/{queueId} {
+      allow read: if signedIn();
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      // The player who finds a match marks the other player's entry as matched.
+      allow update: if signedIn()
+        && (resource.data.uid == request.auth.uid
+            || changedKeys().hasOnly(['status', 'matchedDuelId']));
+      allow delete: if signedIn() && resource.data.uid == request.auth.uid;
+    }
+
+    // ---------- Chat, reports, feedback ----------
+    match /globalChat/{messageId} {
+      allow read: if signedIn();
+      allow create: if signedIn()
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.text is string
+        && request.resource.data.text.size() <= 200;
+      allow update, delete: if false;
+    }
+
+    match /reportedMessages/{reportId} {
+      allow create: if signedIn() && request.resource.data.reportedBy == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    match /feedback/{feedbackId} {
+      allow create: if signedIn() && request.resource.data.uid == request.auth.uid;
+      allow read, update, delete: if false;
+    }
+
+    // ---------- Clans: all changes go through the backend ----------
+    match /clans/{clanId} {
+      allow read: if signedIn();
+      allow write: if false;
+    }
+
+    // Anything not listed above is denied.
+  }
+}
